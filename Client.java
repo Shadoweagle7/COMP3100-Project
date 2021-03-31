@@ -2,55 +2,57 @@ import java.io.*;
 import java.net.*;
 
 public class Client {
-    static BufferedReader din;
-    static PrintStream dout;
+    static DataInputStream din;
+    static DataOutputStream dout;
+    static byte[] received;
 
     public static void main(String[] args) throws Exception {
         Socket s = new Socket("localhost", 50000);
 
-        din = new BufferedReader(new InputStreamReader(s.getInputStream()));
-        dout = new PrintStream(s.getOutputStream());
-        String str="";
+        din = new DataInputStream(s.getInputStream());
+        dout = new DataOutputStream(s.getOutputStream());
         
-        dout.print("HELO\n");
-        System.out.println("Sending HELO");
+        send("HELO");
         
-        str = waitForServer();
-        if (!str.equals("OK")) {
-            System.exit(0);
-        }
-        System.out.println("server: " + str);
+        receive(2, "OK");
 
-        dout.print("AUTH bob\n");
-        System.out.println("Authorising");
+        send("AUTH bob");
         
-        str = waitForServer();
-        if (!str.equals("OK")) {
-            System.exit(0);
-        }
-        System.out.println("server: " + str);
+        receive(2, "OK");
 
-        dout.print("REDY\n");
-        System.out.println("Sending REDY");
+        send("GETS ALL");
         
-        str = waitForServer();
+        din.read(received);
         // If str.equals("SOME VARIETY OF JOB")
-        System.out.println("server: " + str);
+        System.out.println("server: " + new String(received));
 
-        dout.print("QUIT\n");
-        System.out.println("Sending QUIT");
+        send("QUIT");
 
         dout.close();
         din.close();
         s.close();
     }
 
-    public static String waitForServer() throws IOException {
-        while (!Thread.interrupted()) {
-            if (din.ready()) {
-                return din.readLine();
-            }
+    public static void send(String toSend) throws IOException {
+        dout.write(toSend.getBytes());
+        System.out.println("Sending " + toSend);
+    }
+
+    public static void receive(int size) throws IOException {
+        received = new byte[size];
+        din.read(received);
+        System.out.println("Server: " + new String(received));
+    }
+
+    public static void receive(int size, String expectedString) throws IOException {
+        received = new byte[size];
+        din.read(received);
+
+        String receivedString = new String(received);
+        System.out.println("Server: " + receivedString);
+        
+        if (!receivedString.equals(expectedString)) {
+            System.exit(0);
         }
-        return "";
     }
 }
