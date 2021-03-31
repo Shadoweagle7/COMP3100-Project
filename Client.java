@@ -87,7 +87,7 @@ public class Client {
         if (!receivedString.equals(expectedString)) {
             printErrorMessage(expectedString, receivedString);
 
-            // throw
+            // TODO: throw
         }
     }
 
@@ -103,7 +103,7 @@ public class Client {
             this.recordLength = recLen;
         }
 
-        public int[] execute() {
+        public int[] execute() { // Covariant return allowed from base class Command. All arrays inherit from Object
             return new int[]{numberOfRecords, recordLength};
         }
     }
