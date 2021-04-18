@@ -47,7 +47,7 @@ public class Client {
 
             String rawDataString = receive(received, 12, din); // DATA nRecs recLen
 
-            Data dataCommand = new Data(rawDataString);
+            Data dataCommand = (Data)parseCommand(rawDataString);
 
             int[] dataBytes = dataCommand.execute();
             int totalDataSize = dataBytes[0] * dataBytes[1];
@@ -278,33 +278,38 @@ public class Client {
     public static class Data {
         private int numberOfRecords, recordLength;
 
-        public Data(String str) throws NumberFormatException, ArrayIndexOutOfBoundsException, IllegalArgumentException, NullPointerException {
-            if (str == null || str.length() == 0) {
-                throw new NullPointerException("Invalid input");
+        public Data(int nRec, int recLen) throws IllegalArgumentException {
+            if (nRec <= 0 || recLen <= 0) {
+                throw new IllegalArgumentException("Cannot have 0 or less records. Each record's size must be greater than 0");
             }
 
-            String[] args = str.split(" ");
-
-            if (args == null || args.length == 0) {
-                throw new ArrayIndexOutOfBoundsException("Invalid command");
-            }
-
-            if (args[0].equals("DATA")) {
-                int numberOfRecords = Integer.parseInt(args[1]), recordLength = Integer.parseInt(args[2]);
-
-                if (numberOfRecords <= 0 || recordLength <= 0) {
-                    throw new IllegalArgumentException("Cannot have 0 or less records. Each record's size must be greater than 0");
-                }
-    
-                this.numberOfRecords = numberOfRecords;
-                this.recordLength = recordLength;
-            }
-
-            throw new IllegalArgumentException("Invalid command");
+            this.numberOfRecords = nRec;
+            this.recordLength = recLen;
         }
 
         public int[] execute() { // Covariant return allowed from base class Command. All arrays inherit from Object
             return new int[]{numberOfRecords, recordLength};
         }
+    }
+
+    public static Data parseCommand(String str) 
+        throws NumberFormatException, ArrayIndexOutOfBoundsException, IllegalArgumentException, NullPointerException {
+        if (str == null || str.length() == 0) {
+            throw new NullPointerException("Invalid input");
+        }
+
+        String[] args = str.split(" ");
+
+        if (args == null || args.length == 0) {
+            throw new ArrayIndexOutOfBoundsException("Invalid command");
+        }
+
+        if (args[0].equals("DATA")) {
+            int numberOfRecords = Integer.parseInt(args[1]), recordLength = Integer.parseInt(args[2]);
+
+            return new Data(numberOfRecords, recordLength);
+        }
+
+        throw new IllegalArgumentException("Invalid command");
     }
 }
