@@ -47,7 +47,7 @@ public class Client {
 
             String rawDataString = receive(received, 12, din); // DATA nRecs recLen
 
-            DataCommand dataCommand = (DataCommand)parseCommand(rawDataString);
+            Data dataCommand = (Data)parseCommand(rawDataString);
 
             int[] dataBytes = dataCommand.execute();
             int totalDataSize = dataBytes[0] * dataBytes[1];
@@ -275,14 +275,10 @@ public class Client {
         }
     }
 
-    public static abstract class Command {
-        public abstract Object execute();
-    }
-
-    public static class DataCommand extends Command {
+    public static class Data {
         private int numberOfRecords, recordLength;
 
-        public DataCommand(int nRec, int recLen) throws IllegalArgumentException {
+        public Data(int nRec, int recLen) throws IllegalArgumentException {
             if (nRec <= 0 || recLen <= 0) {
                 throw new IllegalArgumentException("Cannot have 0 or less records. Each record's size must be greater than 0");
             }
@@ -296,7 +292,7 @@ public class Client {
         }
     }
 
-    public static Command parseCommand(String str) 
+    public static Data parseCommand(String str) 
         throws NumberFormatException, ArrayIndexOutOfBoundsException, IllegalArgumentException, NullPointerException {
         if (str == null || str.length() == 0) {
             throw new NullPointerException("Invalid input");
@@ -311,7 +307,7 @@ public class Client {
         if (args[0].equals("DATA")) {
             int numberOfRecords = Integer.parseInt(args[1]), recordLength = Integer.parseInt(args[2]);
 
-            return new DataCommand(numberOfRecords, recordLength);
+            return new Data(numberOfRecords, recordLength);
         }
 
         throw new IllegalArgumentException("Invalid command");
