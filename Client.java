@@ -126,9 +126,7 @@ public class Client {
 
                     send(dout, "SCHD " + current.getJobID() + " " + sType + " " + sID);
 
-                    if (receive(received, 64, din).equals("ERR: Server incapable of running such a job")) {
-                        int j = 0; while (j < Integer.MAX_VALUE) { j++; j--; }
-                    }
+                    receive(received, 64, din);
 
                     send(dout, "REDY");
                 } else if (current.getType().equals("JCPL")) {
