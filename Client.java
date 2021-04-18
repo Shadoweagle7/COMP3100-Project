@@ -92,12 +92,9 @@ public class Client {
             
             while (!current.getType().equals("NONE")) {
                 if (current.getType().equals("JOBN")) {
-                    String sType = "lol";
-                    int sID = 0;
+                    Tuple selected = selectServer(current, servers, din, dout);
 
-                    selectServer(current, sType, sID, servers, din, dout);
-
-                    send(dout, "SCHD " + current.getJobID() + " " + sType + " " + sID);
+                    send(dout, "SCHD " + current.getJobID() + " " + selected.x + " " + selected.y);
 
                     receive(received, 64, din);
 
@@ -158,9 +155,9 @@ public class Client {
         return receivedString;
     }
 
-    public static void selectServer(Job current, String sType, int sID, ArrayList<Server> servers, DataInputStream din, DataOutputStream dout) throws IOException {
-        sType = "lol";
-        sID = 0;
+    public static Tuple selectServer(Job current, ArrayList<Server> servers, DataInputStream din, DataOutputStream dout) throws IOException {
+        String sType = "lol";
+        int sID = 0;
         
         final int coreCount = current.getCore();
         ArrayList<Server> compatibleServers = (ArrayList<Server>)servers.stream().filter(
@@ -188,6 +185,8 @@ public class Client {
             sType = compatibleServers.get(0).getServerType();
             sID = compatibleServers.get(0).getServerID();
         }
+
+        return new Tuple(sType, sID);
     }
 
     public static class Server {
@@ -275,6 +274,26 @@ public class Client {
 
         public int getCore() {
             return this.core;
+        }
+    }
+
+    public static class Tuple {
+        // JOBN submitTime jobID estRuntime core memory disk
+        
+        private String x;
+        private int y;
+                
+        public Tuple(String x, int y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        public String getX() {
+            return this.x;
+        }
+
+        public int getY() {
+            return this.y;
         }
     }
 
