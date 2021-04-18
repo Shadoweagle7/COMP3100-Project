@@ -38,10 +38,7 @@ public class Client {
             send(dout, "REDY");
 
             String job = receive(received, 64, din); // JOBN ...
-
             jobs.add(new Job(job));
-
-            //byte[] jobn = Arrays.copyOf(received, received.length); // Store for later
 
             send(dout, "GETS All");
 
@@ -97,32 +94,8 @@ public class Client {
                 if (current.getType().equals("JOBN")) {
                     String sType = "lol";
                     int sID = 0;
-                    
-                    final int coreCount = current.getCore();
-                    ArrayList<Server> compatibleServers = (ArrayList<Server>)servers.stream().filter(
-                        (server) -> (server.getNumberOfCores() >= coreCount)
-                    ).collect(Collectors.toList());
 
-                    int minJobs = 1;
-                    
-                    for (int i = 0; i < compatibleServers.size(); i++) {
-                        send(dout, "CNTJ " + compatibleServers.get(i).getServerType() + " " + compatibleServers.get(i).getServerID() + " " + 2 /* the running job state */ );
-                        System.out.println(compatibleServers.get(i).getNumberOfCores());
-                        int cntj = Integer.parseInt(receive(received, 4, din));
-
-                        if (cntj < minJobs) {
-                            sType = compatibleServers.get(i).getServerType();
-                            sID = compatibleServers.get(i).getServerID();
-                            break;
-                        } else {
-                            minJobs = cntj;
-                        }
-                    }
-
-                    if (sType.equals("lol")) {
-                        sType = compatibleServers.get(0).getServerType();
-                        sID = compatibleServers.get(0).getServerID();
-                    }
+                    selectServer(current, sType, sID, servers, din, dout);
 
                     send(dout, "SCHD " + current.getJobID() + " " + sType + " " + sID);
 
@@ -183,6 +156,38 @@ public class Client {
         }
 
         return receivedString;
+    }
+
+    public static void selectServer(Job current, String sType, int sID, ArrayList<Server> servers, DataInputStream din, DataOutputStream dout) throws IOException {
+        sType = "lol";
+        sID = 0;
+        
+        final int coreCount = current.getCore();
+        ArrayList<Server> compatibleServers = (ArrayList<Server>)servers.stream().filter(
+            (server) -> (server.getNumberOfCores() >= coreCount)
+        ).collect(Collectors.toList());
+
+        int minJobs = 1;
+        
+        for (int i = 0; i < compatibleServers.size(); i++) {
+            send(dout, "CNTJ " + compatibleServers.get(i).getServerType() + " " + compatibleServers.get(i).getServerID() + " " + 2 /* the running job state */ );
+
+            byte[] received = new byte[4];
+            int cntj = Integer.parseInt(receive(received, 4, din));
+
+            if (cntj < minJobs) {
+                sType = compatibleServers.get(i).getServerType();
+                sID = compatibleServers.get(i).getServerID();
+                break;
+            } else {
+                minJobs = cntj;
+            }
+        }
+
+        if (sType.equals("lol")) {
+            sType = compatibleServers.get(0).getServerType();
+            sID = compatibleServers.get(0).getServerID();
+        }
     }
 
     public static class Server {
