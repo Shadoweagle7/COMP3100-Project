@@ -31,7 +31,7 @@ public class Client {
         
             receive(received, "OK", din);
 
-            send(dout, "AUTH bob");
+            send(dout, "AUTH shadoweagle7");
             
             receive(received, "OK", din);
 
@@ -106,7 +106,7 @@ public class Client {
                 current = new Job(receive(received, 64, din));
             }
             
-            send(dout, "OK");
+            //send(dout, "OK");
 
             send(dout, "QUIT");
 
@@ -158,33 +158,36 @@ public class Client {
     public static Tuple selectServer(Job current, ArrayList<Server> servers, DataInputStream din, DataOutputStream dout) throws IOException {
         String sType = "lol";
         int sID = 0;
-        
+
         final int coreCount = current.getCore();
         ArrayList<Server> compatibleServers = (ArrayList<Server>)servers.stream().filter(
             (server) -> (server.getNumberOfCores() >= coreCount)
         ).collect(Collectors.toList());
 
-        int minJobs = 1;
-        
-        for (int i = 0; i < compatibleServers.size(); i++) {
-            send(dout, "CNTJ " + compatibleServers.get(i).getServerType() + " " + compatibleServers.get(i).getServerID() + " " + 2 /* the running job state */ );
+        // int minJobs = 1;
 
-            byte[] received = new byte[4];
-            int cntj = Integer.parseInt(receive(received, 4, din));
+        // for (int i = 0; i < compatibleServers.size(); i++) {
+        //     send(dout, "CNTJ " + compatibleServers.get(i).getServerType() + " " + compatibleServers.get(i).getServerID() + " " + 2 /* the running job state */ );
 
-            if (cntj < minJobs) {
-                sType = compatibleServers.get(i).getServerType();
-                sID = compatibleServers.get(i).getServerID();
-                break;
-            } else {
-                minJobs = cntj;
-            }
-        }
+        //     byte[] received = new byte[4];
+        //     int cntj = Integer.parseInt(receive(received, 4, din));
 
-        if (sType.equals("lol")) {
-            sType = compatibleServers.get(0).getServerType();
-            sID = compatibleServers.get(0).getServerID();
-        }
+        //     if (cntj < minJobs) {
+        //         sType = compatibleServers.get(i).getServerType();
+        //         sID = compatibleServers.get(i).getServerID();
+        //         break;
+        //     } else {
+        //         minJobs = cntj;
+        //     }
+        // }
+
+        // if (sType.equals("lol")) {
+        //     sType = compatibleServers.get(0).getServerType();
+        //     sID = compatibleServers.get(0).getServerID();
+        // }
+
+        sType = compatibleServers.get(0).getServerType();
+        sID = compatibleServers.get(0).getServerID();
 
         return new Tuple(sType, sID);
     }
