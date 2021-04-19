@@ -1,0 +1,3 @@
+Run client using java (e.g. if in the same directory as Client.java and Client.class, run java Client). The port is hard coded to 50000.
+
+Test scripts are not included in this submission.
