@@ -312,7 +312,7 @@ public class Client {
             this.recordLength = recLen;
         }
 
-        public int[] execute() { // Covariant return allowed from base class Command. All arrays inherit from Object
+        public int[] execute() {
             return new int[]{numberOfRecords, recordLength};
         }
     }
